@@ -37,16 +37,16 @@ if __name__ == '__main__':
     parser.add_argument('--decay_n', type=int, required=False, default=1,
                         help='Every n epochs apply hard_decay_factor.')
 
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
-    args = parser.parse_args([
-        '--model', 'resnet18',
-        '--loss', 'ols',
-        '--alpha', '0.5',
-        '--smooth', '0.1',
-        '--decay_a', '0.0',
-        '--decay_n', '1',
-    ])
+    # args = parser.parse_args([
+    #     '--model', 'resnet18',
+    #     '--loss', 'ols',
+    #     '--alpha', '0.5',
+    #     '--smooth', '0.1',
+    #     '--decay_a', '0.0',
+    #     '--decay_n', '1',
+    # ])
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     best_acc = 0  # best test accuracy
