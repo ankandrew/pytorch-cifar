@@ -12,13 +12,44 @@ from models import *
 from online_label_smooth import OnlineLabelSmoothing
 from utils import progress_bar
 
+# TODO: Change # of classes
 model_to_class = {
     'resnet18': ResNet18,
     'resnet34': ResNet34,
     'resnet50': ResNet50,
     'resnet101': ResNet101,
     'resnet152': ResNet152,
-    'senet18': SENet18
+    'senet18': SENet18,
+    'densenet121': DenseNet121,
+    'densenet169': DenseNet169,
+    'densenet201': DenseNet201,
+    'densenet161': DenseNet161,
+    'densenet_cifar': densenet_cifar,
+    'dla': DLA,
+    'SimpleDLA': SimpleDLA,
+    'dpn26': DPN26,
+    'dpn92': DPN92,
+    'efficientnetb0': EfficientNetB0,
+    'googlenet': GoogLeNet,
+    'lenet': LeNet,
+    'mobilenet': MobileNet,
+    'mobilenetv2': MobileNetV2,
+    'pnasneta': PNASNetA,
+    'pnasnetb': PNASNetB,
+    'preactresnet18': PreActResNet18,
+    'preactresnet34': PreActResNet34,
+    'preactresnet50': PreActResNet50,
+    'preactresnet101': PreActResNet101,
+    'preactresnet152': PreActResNet152,
+    'regnetx_200mf': RegNetX_200MF,
+    'regnetx_400mf': RegNetX_400MF,
+    'regnety_400mf': RegNetY_400MF,
+    'resnext29_2x64d': ResNeXt29_2x64d,
+    'resnext29_4x64d': ResNeXt29_4x64d,
+    'resnext29_8x64d': ResNeXt29_8x64d,
+    'resnext29_32x4d': ResNeXt29_32x4d,
+    'shufflenetg2': ShuffleNetG2,
+    'shufflenetg3': ShuffleNetG3
 }
 
 if __name__ == '__main__':
@@ -193,3 +224,5 @@ if __name__ == '__main__':
         train(epoch)
         test(epoch)
         scheduler.step()
+        if isinstance(criterion, OnlineLabelSmoothing):
+            criterion.next_epoch()
