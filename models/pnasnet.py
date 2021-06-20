@@ -5,6 +5,7 @@ Paper: Progressive Neural Architecture Search
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .settings import CFG
 
 
 class SepConv(nn.Module):
@@ -74,7 +75,7 @@ class PNASNet(nn.Module):
         self.in_planes = num_planes
         self.cell_type = cell_type
 
-        self.conv1 = nn.Conv2d(3, num_planes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(CFG.INPUT_CHANNELS, num_planes, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(num_planes)
 
         self.layer1 = self._make_layer(num_planes, num_cells=6)
@@ -83,7 +84,7 @@ class PNASNet(nn.Module):
         self.layer4 = self._downsample(num_planes*4)
         self.layer5 = self._make_layer(num_planes*4, num_cells=6)
 
-        self.linear = nn.Linear(num_planes*4, 10)
+        self.linear = nn.Linear(num_planes*4, CFG.NUM_CLASSES)
 
     def _make_layer(self, planes, num_cells):
         layers = []
@@ -122,4 +123,6 @@ def test():
     y = net(x)
     print(y)
 
-# test()
+
+if __name__ == '__main__':
+    test()

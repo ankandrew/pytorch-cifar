@@ -9,6 +9,7 @@ Reference:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .settings import CFG
 
 
 class BasicBlock(nn.Module):
@@ -71,11 +72,11 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10):
+    def __init__(self, block, num_blocks, num_classes=CFG.NUM_CLASSES):
         super(ResNet, self).__init__()
         self.in_planes = 64
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
+        self.conv1 = nn.Conv2d(CFG.INPUT_CHANNELS, 64, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
@@ -129,4 +130,6 @@ def test():
     y = net(torch.randn(1, 3, 32, 32))
     print(y.size())
 
-# test()
+
+if __name__ == '__main__':
+    test()

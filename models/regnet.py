@@ -7,6 +7,7 @@ Reference: https://github.com/keras-team/keras-applications/blob/master/keras_ap
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .settings import CFG
 
 
 class SE(nn.Module):
@@ -66,11 +67,11 @@ class Block(nn.Module):
 
 
 class RegNet(nn.Module):
-    def __init__(self, cfg, num_classes=10):
+    def __init__(self, cfg, num_classes=CFG.NUM_CLASSES):
         super(RegNet, self).__init__()
         self.cfg = cfg
         self.in_planes = 64
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
+        self.conv1 = nn.Conv2d(CFG.INPUT_CHANNELS, 64, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(0)

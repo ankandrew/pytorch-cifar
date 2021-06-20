@@ -1,6 +1,7 @@
 '''VGG11/13/16/19 in Pytorch.'''
 import torch
 import torch.nn as nn
+from .settings import CFG
 
 
 cfg = {
@@ -15,7 +16,7 @@ class VGG(nn.Module):
     def __init__(self, vgg_name):
         super(VGG, self).__init__()
         self.features = self._make_layers(cfg[vgg_name])
-        self.classifier = nn.Linear(512, 10)
+        self.classifier = nn.Linear(512, CFG.NUM_CLASSES)
 
     def forward(self, x):
         out = self.features(x)
@@ -25,7 +26,7 @@ class VGG(nn.Module):
 
     def _make_layers(self, cfg):
         layers = []
-        in_channels = 3
+        in_channels = CFG.INPUT_CHANNELS
         for x in cfg:
             if x == 'M':
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
@@ -44,4 +45,6 @@ def test():
     y = net(x)
     print(y.size())
 
-# test()
+
+if __name__ == '__main__':
+    test()

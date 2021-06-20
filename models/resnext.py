@@ -5,6 +5,7 @@ See the paper "Aggregated Residual Transformations for Deep Neural Networks" for
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .settings import CFG
 
 
 class Block(nn.Module):
@@ -38,13 +39,13 @@ class Block(nn.Module):
 
 
 class ResNeXt(nn.Module):
-    def __init__(self, num_blocks, cardinality, bottleneck_width, num_classes=10):
+    def __init__(self, num_blocks, cardinality, bottleneck_width, num_classes=CFG.NUM_CLASSES):
         super(ResNeXt, self).__init__()
         self.cardinality = cardinality
         self.bottleneck_width = bottleneck_width
         self.in_planes = 64
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=1, bias=False)
+        self.conv1 = nn.Conv2d(CFG.INPUT_CHANNELS, 64, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(num_blocks[0], 1)
         self.layer2 = self._make_layer(num_blocks[1], 2)
@@ -92,4 +93,6 @@ def test_resnext():
     y = net(x)
     print(y.size())
 
-# test_resnext()
+
+if __name__ == '__main__':
+    test_resnext()

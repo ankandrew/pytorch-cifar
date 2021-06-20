@@ -5,6 +5,7 @@ See the paper "ShuffleNet: An Extremely Efficient Convolutional Neural Network f
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .settings import CFG
 
 
 class ShuffleBlock(nn.Module):
@@ -55,13 +56,13 @@ class ShuffleNet(nn.Module):
         num_blocks = cfg['num_blocks']
         groups = cfg['groups']
 
-        self.conv1 = nn.Conv2d(3, 24, kernel_size=1, bias=False)
+        self.conv1 = nn.Conv2d(CFG.INPUT_CHANNELS, 24, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(24)
         self.in_planes = 24
         self.layer1 = self._make_layer(out_planes[0], num_blocks[0], groups)
         self.layer2 = self._make_layer(out_planes[1], num_blocks[1], groups)
         self.layer3 = self._make_layer(out_planes[2], num_blocks[2], groups)
-        self.linear = nn.Linear(out_planes[2], 10)
+        self.linear = nn.Linear(out_planes[2], CFG.NUM_CLASSES)
 
     def _make_layer(self, out_planes, num_blocks, groups):
         layers = []
@@ -106,4 +107,6 @@ def test():
     y = net(x)
     print(y)
 
-# test()
+
+if __name__ == '__main__':
+    test()

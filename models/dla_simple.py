@@ -11,6 +11,7 @@ Reference:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .settings import CFG
 
 
 class BasicBlock(nn.Module):
@@ -76,10 +77,10 @@ class Tree(nn.Module):
 
 
 class SimpleDLA(nn.Module):
-    def __init__(self, block=BasicBlock, num_classes=10):
+    def __init__(self, block=BasicBlock, num_classes=CFG.NUM_CLASSES):
         super(SimpleDLA, self).__init__()
         self.base = nn.Sequential(
-            nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(CFG.INPUT_CHANNELS, 16, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(16),
             nn.ReLU(True)
         )
