@@ -118,7 +118,7 @@ if __name__ == '__main__':
     def train(epoch):
         if isinstance(criterion, OnlineLabelSmoothing):
             criterion.train()
-        print('\nEpoch: %d' % epoch)
+        # print('\nEpoch: %d' % epoch)
         net.train()
         train_loss = 0
         correct = 0
@@ -165,7 +165,7 @@ if __name__ == '__main__':
         # Save checkpoint.
         acc = 100. * correct / total
         if acc > best_acc:
-            print('Saving..')
+            # print('Saving..')
             state = {
                 'net': net.state_dict(),
                 'acc': acc,
