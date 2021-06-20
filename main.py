@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # DEBUG
+    # # DEBUG
     # args = parser.parse_args([
     #     '--model', 'resnet18',
     #     '--loss', 'ols',
