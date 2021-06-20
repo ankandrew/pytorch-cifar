@@ -1,0 +1,3 @@
+class CFG:
+    NUM_CLASSES = 10
+    INPUT_CHANNELS = 3
