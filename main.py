@@ -7,50 +7,11 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 
-from label_smooth import LabelSmoothingLoss
 from models import *
-from online_label_smooth import OnlineLabelSmoothing
-from utils import progress_bar
+from ols.label_smooth import LabelSmoothingLoss
+from ols.online_label_smooth import OnlineLabelSmoothing
+from utils import progress_bar, model_to_class
 
-# TODO: Change # of classes
-model_to_class = {
-    'resnet18': ResNet18,
-    'resnet34': ResNet34,
-    'resnet50': ResNet50,
-    'resnet101': ResNet101,
-    'resnet152': ResNet152,
-    'senet18': SENet18,
-    'densenet121': DenseNet121,
-    'densenet169': DenseNet169,
-    'densenet201': DenseNet201,
-    'densenet161': DenseNet161,
-    'densenet_cifar': densenet_cifar,
-    'dla': DLA,
-    'SimpleDLA': SimpleDLA,
-    'dpn26': DPN26,
-    'dpn92': DPN92,
-    'efficientnetb0': EfficientNetB0,
-    'googlenet': GoogLeNet,
-    'lenet': LeNet,
-    'mobilenet': MobileNet,
-    'mobilenetv2': MobileNetV2,
-    'pnasneta': PNASNetA,
-    'pnasnetb': PNASNetB,
-    'preactresnet18': PreActResNet18,
-    'preactresnet34': PreActResNet34,
-    'preactresnet50': PreActResNet50,
-    'preactresnet101': PreActResNet101,
-    'preactresnet152': PreActResNet152,
-    'regnetx_200mf': RegNetX_200MF,
-    'regnetx_400mf': RegNetX_400MF,
-    'regnety_400mf': RegNetY_400MF,
-    'resnext29_2x64d': ResNeXt29_2x64d,
-    'resnext29_4x64d': ResNeXt29_4x64d,
-    'resnext29_8x64d': ResNeXt29_8x64d,
-    'resnext29_32x4d': ResNeXt29_32x4d,
-    'shufflenetg2': ShuffleNetG2,
-    'shufflenetg3': ShuffleNetG3
-}
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
@@ -70,6 +31,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    # DEBUG
     # args = parser.parse_args([
     #     '--model', 'resnet18',
     #     '--loss', 'ols',
@@ -114,33 +76,24 @@ if __name__ == '__main__':
                'dog', 'frog', 'horse', 'ship', 'truck')
 
     # Model
-    print('==> Building model..')
-    # net = VGG('VGG19')
-    # net = ResNet18()
-    # net = PreActResNet18()
-    # net = GoogLeNet()
-    # net = DenseNet121()
-    # net = ResNeXt29_2x64d()
-    # net = MobileNet()
-    # net = MobileNetV2()
-    # net = DPN92()
-    # net = ShuffleNetG2()
-    # net = SENet18()
-    # net = ShuffleNetV2(1)
-    # net = EfficientNetB0()
-    # net = RegNetX_200MF()
-    # net = SimpleDLA()
+    print(f'==> Building {args.model} model ..')
     net = model_to_class[args.model]()
     net = net.to(device)
     if device == 'cuda':
         net = torch.nn.DataParallel(net)
         cudnn.benchmark = True
 
+    save_filename = f'{args.model}-{args.loss}'
+    if args.loss == 'ls':
+        save_filename += f'-smooth_{args.smooth}'
+    elif args.loss == 'ols':
+        save_filename += f'-alpha_{args.alpha}-smooth_{args.smooth}-a_{args.decay_a}-n_{args.decay_n}'
+    save_filename += '.pth'
     if args.resume:
         # Load checkpoint.
         print('==> Resuming from checkpoint..')
         assert os.path.isdir('checkpoint'), 'Error: no checkpoint directory found!'
-        checkpoint = torch.load('./checkpoint/ckpt.pth')
+        checkpoint = torch.load(f'./checkpoint/{save_filename}')
         net.load_state_dict(checkpoint['net'])
         best_acc = checkpoint['acc']
         start_epoch = checkpoint['epoch']
@@ -153,7 +106,7 @@ if __name__ == '__main__':
     else:
         criterion = OnlineLabelSmoothing(alpha=args.alpha, n_classes=len(classes), smoothing=args.smooth,
                                          hard_decay_factor=args.decay_a, hard_decay_epochs=args.decay_n)
-        print(f'{"#" * 7}OLS{"#" * 7}\nalpha={args.alpha}, smoothing={args.smooth}\n{"#" * 30}')
+        print(f'{"#" * 11}OLS{"#" * 11}\nalpha={args.alpha}, smoothing={args.smooth}\n{"#" * 30}')
         criterion = criterion.to(device)
 
     optimizer = optim.SGD(net.parameters(), lr=args.lr,
@@ -163,6 +116,8 @@ if __name__ == '__main__':
 
     # Training
     def train(epoch):
+        if isinstance(criterion, OnlineLabelSmoothing):
+            criterion.train()
         print('\nEpoch: %d' % epoch)
         net.train()
         train_loss = 0
@@ -188,6 +143,8 @@ if __name__ == '__main__':
     def test(epoch):
         global best_acc
         net.eval()
+        if isinstance(criterion, OnlineLabelSmoothing):
+            criterion.eval()
         test_loss = 0
         correct = 0
         total = 0
@@ -216,7 +173,7 @@ if __name__ == '__main__':
             }
             if not os.path.isdir('checkpoint'):
                 os.mkdir('checkpoint')
-            torch.save(state, './checkpoint/ckpt.pth')
+            torch.save(state, f'./checkpoint/{save_filename}')
             best_acc = acc
 
 
@@ -226,3 +183,4 @@ if __name__ == '__main__':
         scheduler.step()
         if isinstance(criterion, OnlineLabelSmoothing):
             criterion.next_epoch()
+    print(f'{"#"*9}Best accuracy{"#"*8} \n{best_acc}\n{"#"*30}')
