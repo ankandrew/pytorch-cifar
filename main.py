@@ -28,18 +28,18 @@ if __name__ == '__main__':
                         help='Decrease to the alpha balancing term.')
     parser.add_argument('--decay_n', type=int, required=False, default=1,
                         help='Every n epochs apply hard_decay_factor.')
-
-    args = parser.parse_args()
+    parser.add_argument('--progress-bar', action='store_true', help='Show progress bar.')
+    # args = parser.parse_args()
 
     # # DEBUG
-    # args = parser.parse_args([
-    #     '--model', 'resnet18',
-    #     '--loss', 'ols',
-    #     '--alpha', '0.5',
-    #     '--smooth', '0.1',
-    #     '--decay_a', '0.0',
-    #     '--decay_n', '1',
-    # ])
+    args = parser.parse_args([
+        '--model', 'resnet18',
+        '--loss', 'ols',
+        '--alpha', '0.5',
+        '--smooth', '0.1',
+        '--decay_a', '0.0',
+        '--decay_n', '1',
+    ])
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     best_acc = 0  # best test accuracy
@@ -136,8 +136,9 @@ if __name__ == '__main__':
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
 
-            progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-                         % (train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
+            if args.progress_bar:
+                progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+                             % (train_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
 
     def test(epoch):
@@ -159,13 +160,14 @@ if __name__ == '__main__':
                 total += targets.size(0)
                 correct += predicted.eq(targets).sum().item()
 
-                progress_bar(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
-                             % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
+                if args.progress_bar:
+                    progress_bar(batch_idx, len(testloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
+                                 % (test_loss / (batch_idx + 1), 100. * correct / total, correct, total))
 
         # Save checkpoint.
         acc = 100. * correct / total
         if acc > best_acc:
-            # print('Saving..')
+            print(f'New best: {best_acc}')
             state = {
                 'net': net.state_dict(),
                 'acc': acc,
