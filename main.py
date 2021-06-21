@@ -166,7 +166,7 @@ if __name__ == '__main__':
         # Save checkpoint.
         acc = 100. * correct / total
         if acc > best_acc:
-            print(f'New best: {best_acc}')
+            # print(f'New best: {best_acc}')
             state = {
                 'net': net.state_dict(),
                 'acc': acc,
