@@ -12,7 +12,6 @@ from ols.label_smooth import LabelSmoothingLoss
 from ols.online_label_smooth import OnlineLabelSmoothing
 from utils import progress_bar, model_to_class
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
     parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
@@ -29,17 +28,17 @@ if __name__ == '__main__':
     parser.add_argument('--decay_n', type=int, required=False, default=1,
                         help='Every n epochs apply hard_decay_factor.')
     parser.add_argument('--progress-bar', action='store_true', help='Show progress bar.')
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
     # # DEBUG
-    args = parser.parse_args([
-        '--model', 'resnet18',
-        '--loss', 'ols',
-        '--alpha', '0.5',
-        '--smooth', '0.1',
-        '--decay_a', '0.0',
-        '--decay_n', '1',
-    ])
+    # args = parser.parse_args([
+    #     '--model', 'resnet18',
+    #     '--loss', 'ols',
+    #     '--alpha', '0.5',
+    #     '--smooth', '0.1',
+    #     '--decay_a', '0.0',
+    #     '--decay_n', '1',
+    # ])
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     best_acc = 0  # best test accuracy
@@ -185,4 +184,4 @@ if __name__ == '__main__':
         scheduler.step()
         if isinstance(criterion, OnlineLabelSmoothing):
             criterion.next_epoch()
-    print(f'{"#"*9}Best accuracy{"#"*8} \n{best_acc}\n{"#"*30}')
+    print(f'{"#" * 9}Best accuracy{"#" * 8} \n{best_acc}\n{"#" * 30}')
