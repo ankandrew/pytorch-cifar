@@ -65,29 +65,30 @@ class VisualizeCifar10:
         """
         for t, m, s in zip(img, CIFAR10_MEAN, CIFAR10_STD):
             t.mul_(s).add_(m)
-        return img.permute(1, 2, 0) * 255.
+        return img.permute(0, 2, 3, 1) * 255.
 
     def compare_distributions(self):
         """
         Visually compare predictions made by CE, LS, OLS models
         and furthermore compare CIFAR-10H human soft label distribution.
         """
-        fig, axs = plt.subplots(4)
+        fig, axs = plt.subplots(len(self.models)+1)
         fig.tight_layout()
         # fig.suptitle('Vertically stacked subplots')
-        original_img = self.inverse_transform(self.images[0])
+        original_img = self.inverse_transform(self.images)
         original_img = original_img.int().numpy()
-        axs[0].imshow(original_img)
+        axs[0].imshow(original_img[0])
         x = range(10)
         for i, (model_name, model) in enumerate(self.models.items(), 1):
             # Predict
-            pred = model(self.images[0][None, ...]).softmax(dim=1)
+            pred = model(self.images).softmax(dim=1)
             pred_class = classes[pred.argmax(dim=1).item()]
             gt_class = classes[self.labels[0]]
             axs[i].bar(classes, pred.detach().cpu().numpy()[0])
             axs[i].set_title(f'{model_name}    pred={pred_class}    gt={gt_class}')
             axs[i].set_ylim([0, 0.3])
         plt.show()
+        self.images, self.labels = next(self.dataiter)
 
 
 if __name__ == '__main__':
@@ -100,4 +101,6 @@ if __name__ == '__main__':
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=1, shuffle=True, num_workers=0)
     vis_cifar10 = VisualizeCifar10('resnet18', 'C:/Users/Anka/Desktop/checkpoint', testloader)
-    vis_cifar10.compare_distributions()
+    for _ in range(5):
+        vis_cifar10.compare_distributions()
+
