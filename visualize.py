@@ -51,9 +51,10 @@ class VisualizeCifar10:
             if path.is_file():
                 net = model_to_class[self.model_type]()
                 net = torch.nn.DataParallel(net)
+                net.eval()
                 checkpoint = torch.load(path)
                 net.load_state_dict(checkpoint['net'])
-                models[path.name] = net
+                models[path.name] = [net, checkpoint['acc']]
             else:
                 print(f'Skipping non-existent {path} file')
         return models
@@ -79,14 +80,15 @@ class VisualizeCifar10:
         original_img = original_img.int().numpy()
         axs[0].imshow(original_img[0])
         x = range(10)
-        for i, (model_name, model) in enumerate(self.models.items(), 1):
+        for i, (model_name, data) in enumerate(self.models.items(), 1):
             # Predict
+            model, acc = data
             pred = model(self.images).softmax(dim=1)
             pred_class = classes[pred.argmax(dim=1).item()]
             gt_class = classes[self.labels[0]]
             axs[i].bar(classes, pred.detach().cpu().numpy()[0])
-            axs[i].set_title(f'{model_name}    pred={pred_class}    gt={gt_class}')
-            axs[i].set_ylim([0, 0.3])
+            axs[i].set_title(f'{model_name}  y_h={pred_class} h={gt_class}  acc {acc:.3f}')
+            axs[i].set_ylim([0, 1.0])
         plt.show()
         self.images, self.labels = next(self.dataiter)
 
@@ -100,7 +102,7 @@ if __name__ == '__main__':
         root='./data', train=False, download=True, transform=transform_test)
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=1, shuffle=True, num_workers=0)
-    vis_cifar10 = VisualizeCifar10('resnet18', 'C:/Users/Anka/Desktop/checkpoint', testloader)
+    vis_cifar10 = VisualizeCifar10('resnet18', 'C:/Users/Anka/Desktop/checkpoints', testloader)
     for _ in range(5):
         vis_cifar10.compare_distributions()
 
