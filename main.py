@@ -7,10 +7,12 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 
+from sp.softmax_pool import GlobalSoftMaxPool2d
 from models import *
 from ols.label_smooth import LabelSmoothingLoss
 from ols.online_label_smooth import OnlineLabelSmoothing
 from utils import progress_bar, model_to_class
+from moder_patcher import Patcher
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
@@ -28,6 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('--decay_n', type=int, required=False, default=1,
                         help='Every n epochs apply hard_decay_factor.')
     parser.add_argument('--progress-bar', action='store_true', help='Show progress bar.')
+    parser.add_argument('--softmaxpool', action='store_true', help='Wether to use SoftMaxPool or not')
     args = parser.parse_args()
 
     # # DEBUG
@@ -38,6 +41,8 @@ if __name__ == '__main__':
     #     '--smooth', '0.1',
     #     '--decay_a', '0.0',
     #     '--decay_n', '1',
+    #     '--softmaxpool',
+    #     '--progress-bar'
     # ])
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -76,7 +81,8 @@ if __name__ == '__main__':
 
     # Model
     print(f'==> Building {args.model} model ..')
-    net = model_to_class[args.model]()
+    net = Patcher(model_to_class[args.model](not args.softmaxpool),
+                  GlobalSoftMaxPool2d(len(classes)) if args.softmaxpool else None)
     net = net.to(device)
     if device == 'cuda':
         net = torch.nn.DataParallel(net)
