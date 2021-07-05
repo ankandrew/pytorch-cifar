@@ -34,8 +34,8 @@ class GlobalSoftMaxPool2d(nn.Module):
             torch.randn(*param_size, device=x.device, dtype=x.dtype)
         )
         if self.num_classes is not None:
-            self.conv = nn.Conv2d(x.size(1), self.num_classes, kernel_size=1)
-            self.bn = nn.BatchNorm2d(self.num_classes)
+            self.conv = nn.Conv2d(x.size(1), self.num_classes, kernel_size=1).to(x.device)
+            self.bn = nn.BatchNorm2d(self.num_classes).to(x.device)
 
     def forward(self, x):
         """
