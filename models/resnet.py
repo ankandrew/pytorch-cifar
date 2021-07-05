@@ -9,7 +9,7 @@ Reference:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from settings import CFG
+from .settings import CFG
 
 
 class BasicBlock(nn.Module):
